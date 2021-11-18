@@ -11,7 +11,7 @@ public class main {
             Registry registry = LocateRegistry.createRegistry(1099);
             int[][] destinations = {{1,2}, {}, {1}};
             String[][] messages = {{"1", "2"}, {}, {"3"}};
-            int[][] delays = {{3000,500}, {}, {750}};
+            int[][] delays = {{2000,0}, {}, {3000}};
 
             for (int i = 0; i < numProcesses; i++) {
                 SchiperEggliSandoz process = new SchiperEggliSandoz(i, numProcesses);

@@ -34,7 +34,7 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
         SchiperEggliSandozRMI dest = (SchiperEggliSandozRMI) Naming.lookup("SchiperEggliSandoz-" + destination);
         HashMap<Integer, int[]> bufferCopy = new HashMap<>();
         for(var entry: this.buffer.entrySet()){
-            bufferCopy.put(entry.getKey(), entry.getValue());
+            bufferCopy.put(entry.getKey(), Arrays.copyOf(entry.getValue(), entry.getValue().length));
         }
 
         this.vectorClock[this.pid]++;
@@ -65,6 +65,7 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
         for(var entry : this.buffer.entrySet()){
             print += "{" + entry.getKey() + "=" + Arrays.toString(entry.getValue()) + "}";
         }
+        print += " for pid: " + this.pid;
         System.out.println(print);
     }
 
@@ -77,6 +78,7 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
                 print += "{" + entry.getKey() + "=" + Arrays.toString(entry.getValue()) + "}";
             }
             System.out.println(print);
+            System.out.println("Clock after receiving message for " + this.pid + ": " + Arrays.toString(this.vectorClock));
             checkBuffer();
         } else {
             messageBuffer.add(message);
