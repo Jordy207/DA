@@ -23,7 +23,7 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
         try {
             Registry registry = LocateRegistry.getRegistry();
             registry.rebind("SchiperEggliSandoz-" + pid, this);
-            System.out.println("Process " + pid + " ready");
+            System.out.println("Process SchiperEggliSandoz-" + pid + " ready");
         } catch(Exception e){
             System.err.println("Exception " + e.toString());
             e.printStackTrace();
@@ -41,7 +41,7 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
         int[] vcCopy = Arrays.copyOf(this.vectorClock, this.vectorClock.length);
         Message message = new Message(m, bufferCopy, vcCopy);
 
-        System.out.println("Message " + message.toString() + " send from " + this.pid + " to " + destination);
+        System.out.println("Message " + message.toString() + " send from SchiperEggliSandoz-" + this.pid + " to SchiperEggliSandoz-" + destination);
         int wait;
         if(delay < 0){
             wait = (int) (Math.random()*10000);
@@ -72,29 +72,30 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
     public synchronized void receive(Message message){
         if(Buffer.deliverCondition(message.getBuffer(), this.pid, this.vectorClock)){
             deliver(message);
-            System.out.println("Message '" + message.toString() + "' delivered to " + this.pid);
-            String print = "Buffer after receiving message for " + this.pid + ": ";
-            for(var entry : this.buffer.entrySet()){
-                print += "{" + entry.getKey() + "=" + Arrays.toString(entry.getValue()) + "}";
-            }
-            System.out.println(print);
-            System.out.println("Clock after receiving message for " + this.pid + ": " + Arrays.toString(this.vectorClock));
             checkBuffer();
         } else {
-            messageBuffer.add(message);
+            this.messageBuffer.add(message);
         }
     }
 
     public synchronized void deliver(Message message){
+
         this.buffer = Buffer.merge(message.getBuffer(),this.buffer);
         this.vectorClock = VectorClock.max(this.vectorClock, message.getVectorClock());
         this.vectorClock[this.pid]++;
+        System.out.println("Message '" + message.toString() + "' delivered to " + this.pid);
+        String print = "Buffer after receiving message for " + this.pid + ": ";
+        for(var entry : this.buffer.entrySet()){
+            print += "{" + entry.getKey() + "=" + Arrays.toString(entry.getValue()) + "}";
+        }
+        System.out.println(print);
+        System.out.println("Clock after receiving message for " + this.pid + ": " + Arrays.toString(this.vectorClock));
     }
 
     public synchronized void checkBuffer(){
-        for (int i = 0; i < messageBuffer.size(); i++) {
-            if(Buffer.deliverCondition(messageBuffer.get(i).getBuffer(), this.pid, this.vectorClock)){
-                deliver(messageBuffer.remove(i));
+        for (int i = 0; i < this.messageBuffer.size(); i++) {
+            if(Buffer.deliverCondition(this.messageBuffer.get(i).getBuffer(), this.pid, this.vectorClock)){
+                deliver(this.messageBuffer.remove(i));
                 checkBuffer();
             }
         }

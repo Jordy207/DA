@@ -10,7 +10,7 @@ public class VectorClock{
 
     public static boolean lessThenEqualTo(int[] vc1, int[] vc2){
         for (int i = 0; i < vc1.length; i++) {
-            if(vc2[i] > vc1[i]){
+            if(vc1[i] > vc2[i]){
                 return false;
             }
         }

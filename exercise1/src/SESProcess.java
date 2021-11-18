@@ -13,7 +13,9 @@ public class SESProcess implements Runnable{
     public void run() {
         for (int i = 0; i < destinations.length; i++) {
             try {
-//                Thread.sleep(1000);
+                if(process.pid == 2){
+                    Thread.sleep(1000);
+                }
                 process.send(messages[i], destinations[i], delays[i]);
             } catch (Exception e) {
                 e.printStackTrace();
