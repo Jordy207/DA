@@ -16,22 +16,13 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
     public SchiperEggliSandoz(int pid, int processes) throws RemoteException {
         super();
         this.messageBuffer = new ArrayList<>();
-        this.buffer = new HashMap<Integer, int[]>();
+        this.buffer = new HashMap<>();
         this.vectorClock = new int[processes];
         this.pid = pid;
-
-        try {
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("SchiperEggliSandoz-" + pid, this);
-            System.out.println("Process SchiperEggliSandoz-" + pid + " ready");
-        } catch(Exception e){
-            System.err.println("Exception " + e.toString());
-            e.printStackTrace();
-        }
     }
 
     public synchronized void send(String m, int destination, int delay) throws RemoteException, NotBoundException, MalformedURLException {
-        SchiperEggliSandozRMI dest = (SchiperEggliSandozRMI) Naming.lookup("SchiperEggliSandoz-" + destination);
+        SchiperEggliSandozRMI dest = (SchiperEggliSandozRMI) Naming.lookup("rmi://localhost/SchiperEggliSandoz-" + destination);
         HashMap<Integer, int[]> bufferCopy = new HashMap<>();
         for(var entry: this.buffer.entrySet()){
             bufferCopy.put(entry.getKey(), Arrays.copyOf(entry.getValue(), entry.getValue().length));
@@ -98,6 +89,20 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
                 deliver(this.messageBuffer.remove(i));
                 checkBuffer();
             }
+        }
+    }
+
+    public static void main(String[] args){
+        try {
+            for (int i = 0; i < 3; i++) {
+                SchiperEggliSandoz obj = new SchiperEggliSandoz(i, 3);
+                Registry registry = LocateRegistry.getRegistry();
+                registry.bind("SchiperEggliSandoz-" + i, obj   );
+                System.out.println("Process SchiperEggliSandoz-" + i + " ready");
+            }
+        } catch(Exception e){
+            System.err.println("Exception " + e.toString());
+            e.printStackTrace();
         }
     }
 }
