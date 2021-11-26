@@ -139,7 +139,7 @@ public class Component extends UnicastRemoteObject implements Component_RMI {
     }
 
     public void send(int destination, String[] TS, int[] TN, String type) throws MalformedURLException, NotBoundException, RemoteException {
-        Component_RMI dest = (Component_RMI) Naming.lookup("Component-" + destination);
+        Component_RMI dest = (Component_RMI) Naming.lookup("rmi://145.94.166.32/Component-" + destination);
         int sender = this.pid;
         int wait;
         if(this.delay < 0){

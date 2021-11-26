@@ -9,7 +9,7 @@ public class Singhal_main {
     public static void main(String[] args){
         int numProcesses = 3;
         try{
-            Registry registry = LocateRegistry.getRegistry(1099);
+            Registry registry = LocateRegistry.getRegistry("145.94.166.32");
 
             for (int i = 0; i < numProcesses; i++) {
                 Component_RMI process = (Component_RMI) registry.lookup("Component-" + i);
