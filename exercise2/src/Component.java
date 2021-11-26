@@ -174,9 +174,9 @@ public class Component extends UnicastRemoteObject implements Component_RMI {
     }
 
     public static void main(String[] args){
-//        if(System.getSecurityManager() == null){
-//            System.setSecurityManager(new SecurityManager());
-//        }
+        if(System.getSecurityManager() == null){
+            System.setSecurityManager(new SecurityManager());
+        }
         int[] delays = {500, 1000, 1500};
         try {
             Registry registry = LocateRegistry.getRegistry(1099);
