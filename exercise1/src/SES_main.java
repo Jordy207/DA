@@ -1,4 +1,6 @@
 import java.rmi.Naming;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class SES_main {
     public SES_main(){}
@@ -9,9 +11,9 @@ public class SES_main {
             int[][] destinations = {{1,2}, {}, {1}};
             String[][] messages = {{"1", "2"}, {}, {"3"}};
             int[][] delays = {{5000,0}, {}, {500}};
-
+            Registry registry = LocateRegistry.getRegistry("localhost");
             for (int i = 0; i < numProcesses; i++) {
-                SchiperEggliSandozRMI process = (SchiperEggliSandozRMI) Naming.lookup("rmi://localhost/SchiperEggliSandoz-" + i);
+                SchiperEggliSandozRMI process = (SchiperEggliSandozRMI) registry.lookup("SchiperEggliSandoz-" + i);
                 for (int j = 0; j < destinations[i].length; j++) {
                     if(i==2){
                         Thread.sleep(1000);

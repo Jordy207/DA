@@ -93,10 +93,13 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
     }
 
     public static void main(String[] args){
+        if(System.getSecurityManager() == null){
+            System.setSecurityManager(new SecurityManager());
+        }
         try {
+            Registry registry = LocateRegistry.createRegistry( 1099);
             for (int i = 0; i < 3; i++) {
                 SchiperEggliSandoz obj = new SchiperEggliSandoz(i, 3);
-                Registry registry = LocateRegistry.getRegistry();
                 registry.bind("SchiperEggliSandoz-" + i, obj   );
                 System.out.println("Process SchiperEggliSandoz-" + i + " ready");
             }
