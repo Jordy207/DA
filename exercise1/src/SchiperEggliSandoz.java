@@ -22,7 +22,7 @@ public class SchiperEggliSandoz extends UnicastRemoteObject implements SchiperEg
     }
 
     public synchronized void send(String m, int destination, int delay) throws RemoteException, NotBoundException, MalformedURLException {
-        SchiperEggliSandozRMI dest = (SchiperEggliSandozRMI) Naming.lookup("rmi://localhost/SchiperEggliSandoz-" + destination);
+        SchiperEggliSandozRMI dest = (SchiperEggliSandozRMI) Naming.lookup("rmi://145.94.166.32/SchiperEggliSandoz-" + destination);
         HashMap<Integer, int[]> bufferCopy = new HashMap<>();
         for(var entry: this.buffer.entrySet()){
             bufferCopy.put(entry.getKey(), Arrays.copyOf(entry.getValue(), entry.getValue().length));
