@@ -44,16 +44,6 @@ public class Component extends UnicastRemoteObject implements Component_RMI {
                 S[j] = "O";
             }
         }
-
-        try {
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind("Component-" + pid, this);
-            System.out.println("Process Singhal-" + pid + " ready");
-        } catch(Exception e){
-            System.err.println("Exception " + e);
-            e.printStackTrace();
-        }
-
         System.out.println("Process "+this.pid+" started. S is " + Arrays.toString(this.S)+
                 ", TS is "+Arrays.toString(this.TS));
     }
@@ -180,6 +170,24 @@ public class Component extends UnicastRemoteObject implements Component_RMI {
             Thread.sleep(wait);
         } catch (InterruptedException e) {
             System.out.println("Critical section interrupted");
+        }
+    }
+
+    public static void main(String[] args){
+//        if(System.getSecurityManager() == null){
+//            System.setSecurityManager(new SecurityManager());
+//        }
+        int[] delays = {500, 1000, 1500};
+        try {
+            Registry registry = LocateRegistry.getRegistry();
+            for (int i = 0; i < 3; i++) {
+                Component obj = new Component(i, 3, delays[i]);
+                registry.bind("Component-" + i, obj);
+                System.out.println("Process Component-" + i + " ready");
+            }
+        } catch(Exception e){
+            System.err.println("Exception " + e.toString());
+            e.printStackTrace();
         }
     }
 }
