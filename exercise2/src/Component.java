@@ -179,7 +179,7 @@ public class Component extends UnicastRemoteObject implements Component_RMI {
 //        }
         int[] delays = {500, 1000, 1500};
         try {
-            Registry registry = LocateRegistry.getRegistry();
+            Registry registry = LocateRegistry.getRegistry(1099);
             for (int i = 0; i < 3; i++) {
                 Component obj = new Component(i, 3, delays[i]);
                 registry.bind("Component-" + i, obj);
