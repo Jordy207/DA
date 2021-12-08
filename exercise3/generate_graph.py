@@ -21,11 +21,13 @@ n = 10
 graph = create_graph(n)
 name = "test"
 
+weights = list(range(1, len(graph.edges)+1))
+random.shuffle(weights)
 with open("graphs/graph_{}.txt".format(name), 'w') as f:
     f.write(str(n))
     f.write('\n')
     f.write(str(len(graph.edges)))
     f.write('\n')
     for line in graph.edges:
-        f.write(str(line))
+        f.write(str(line)+" "+str(weights.pop(0)))
         f.write('\n')
