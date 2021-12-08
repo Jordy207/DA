@@ -1,3 +1,7 @@
+package ghs;
+
+import java.util.Objects;
+
 public class Edge {
 
     String SE;
@@ -24,5 +28,14 @@ public class Edge {
 
     public int getConnectedNode() {
         return this.connectedNode;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Edge edge = (Edge) o;
+        return weight == edge.weight &&
+                connectedNode == edge.connectedNode;
     }
 }
