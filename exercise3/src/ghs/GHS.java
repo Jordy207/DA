@@ -94,7 +94,7 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
 
     public void send(Message message, Edge j){
         //TODO: RMI lookup!!!
-        GHS_dest.receive(message);
+        //GHS_dest.receive(message);
     }
 
     public void checkQueue(){

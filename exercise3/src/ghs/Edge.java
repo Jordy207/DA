@@ -38,4 +38,8 @@ public class Edge {
         return weight == edge.weight &&
                 connectedNode == edge.connectedNode;
     }
+
+    public String toString() {
+        return this.connectedNode + " " + this.weight;
+    }
 }
