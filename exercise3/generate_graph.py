@@ -10,24 +10,25 @@ def is_connected(graph):
 
 def create_graph(n):
     # p value dictates the sparsity of the graph
-    p = random.uniform(0.25, 0.75)
+    p = random.uniform(0.25, 0.26)
     g = erdos_renyi_graph(n, p, seed=seed, directed=False)
     while not is_connected(g):
-        p = random.uniform(0.25, 0.75)
+        p = random.uniform(0.25, 0.26)
         g = erdos_renyi_graph(n, p, seed=seed, directed=False)
     return g
 
-n = 10
+n = 20
 graph = create_graph(n)
-name = "test"
+name = "{}_nodes".format(n)
 
 weights = list(range(1, len(graph.edges)+1))
 random.shuffle(weights)
 with open("graphs/graph_{}.txt".format(name), 'w') as f:
-    f.write(str(n))
-    f.write('\n')
-    f.write(str(len(graph.edges)))
+    f.write(str(n)+ " " + str(len(graph.edges)))
     f.write('\n')
     for line in graph.edges:
-        f.write(str(line)+" "+str(weights.pop(0)))
+        weight = str(weights.pop(0))
+        f.write(str(line[0]) + " " + str(line[1]) + " " + weight)
+        f.write('\n')
+        f.write(str(line[1]) + " " + str(line[0]) + " " + weight)
         f.write('\n')
