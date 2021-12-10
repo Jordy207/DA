@@ -2,9 +2,15 @@ package ghs;
 
 import ghs.messages.*;
 
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GHS extends UnicastRemoteObject implements GHS_RMI{
@@ -20,11 +26,14 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
     public Edge best_edge;
     public int best_wt;
     public Edge test_edge;
+    public HashMap<Integer, String> ip_dest;
 
-    public GHS(int id, List<Edge> edges) throws RemoteException {
+
+    public GHS(int id, List<Edge> edges, HashMap<Integer, String> ip_dest) throws RemoteException {
         super();
         this.id = id;
         this.edges = edges;
+        this.ip_dest = ip_dest;
         this.message_queue = new ArrayList<>();
         this.LN = 0;
         this.SN = "sleeping";
@@ -44,7 +53,8 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         return resEdge;
     }
 
-    public void wakeUp(){
+    public void wakeUp() throws RemoteException, NotBoundException, MalformedURLException {
+        System.out.println("ghs-" + this.id + " ready");
         Edge j = getMOE(this.edges);
         j.setStatus("in_MST");
         this.LN = 0;
@@ -53,7 +63,7 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         send(message, j);
     }
 
-    public void test(){
+    public void test() throws RemoteException, NotBoundException, MalformedURLException {
         boolean edgeFound = false;
         for(Edge edge : this.edges){
             if(edge.getStatus().equals("?_in_MST")){
@@ -68,7 +78,7 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         }
     }
 
-    public void report(){
+    public void report() throws RemoteException, NotBoundException, MalformedURLException {
         if(this.find_count == 0 && test_edge == null){
             this.SN = "found";
             ReportMessage sendMessage = new ReportMessage(this.best_wt, this.in_branch);
@@ -76,7 +86,7 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         }
     }
 
-    public void changeRoot(){
+    public void changeRoot() throws RemoteException, NotBoundException, MalformedURLException {
         if(this.best_edge.getStatus().equals("in_MST")){
             ChangeMessage sendMessage = new ChangeMessage(this.best_edge);
             this.send(sendMessage, this.best_edge);
@@ -87,20 +97,35 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         }
     }
 
-    public void receive(Message message){
+    public synchronized void receive(Message message) throws RemoteException, NotBoundException, MalformedURLException {
         message.execute(this);
         checkQueue();
     }
 
     public void send(Message message, Edge j){
-        //TODO: RMI lookup!!!
-        GHS_dest.receive(message);
+        String dest = "//" + ip_dest.get(j.getConnectedNode()) + "/ghs-" + j.getConnectedNode();
+        try {
+            GHS_RMI GHS_dest = (GHS_RMI) Naming.lookup(dest);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        Thread.sleep((int)(Math.random()*5000));
+                        GHS_dest.receive(message);
+                    } catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
-    public void checkQueue(){
+    public void checkQueue() throws RemoteException, NotBoundException, MalformedURLException {
         for(Message m : message_queue){
             m.execute(this);
         }
     }
-
 }

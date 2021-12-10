@@ -3,6 +3,10 @@ package ghs.messages;
 import ghs.Edge;
 import ghs.GHS;
 
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
 public class ReportMessage implements Message{
 
     public int w;
@@ -14,7 +18,7 @@ public class ReportMessage implements Message{
     }
 
     @Override
-    public void execute(GHS instance) {
+    public void execute(GHS instance) throws RemoteException, NotBoundException, MalformedURLException {
         if(!this.j.equals(instance.in_branch)) {
             instance.find_count--;
             if(this.w < instance.best_wt){

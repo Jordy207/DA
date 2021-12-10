@@ -2,6 +2,10 @@ package ghs.messages;
 
 import ghs.*;
 
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
 public class ConnectMessage implements Message{
     public int L;
     public Edge j;
@@ -12,7 +16,7 @@ public class ConnectMessage implements Message{
     }
 
     @Override
-    public void execute(GHS instance) {
+    public void execute(GHS instance) throws RemoteException, NotBoundException, MalformedURLException {
         if(instance.SN.equals("sleeping")) instance.wakeUp();
         if(this.L < instance.LN){
             this.j.setStatus("in_MST");

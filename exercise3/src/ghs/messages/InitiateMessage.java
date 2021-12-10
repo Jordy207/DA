@@ -3,6 +3,10 @@ package ghs.messages;
 import ghs.Edge;
 import ghs.GHS;
 
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+
 public class InitiateMessage implements Message{
     int L;
     int F;
@@ -17,7 +21,7 @@ public class InitiateMessage implements Message{
     }
 
     @Override
-    public void execute(GHS instance) {
+    public void execute(GHS instance) throws RemoteException, NotBoundException, MalformedURLException {
         instance.LN = this.L;
         instance.FN = this.F;
         instance.SN = this.S;
