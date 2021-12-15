@@ -9,15 +9,19 @@ import java.rmi.RemoteException;
 
 public class RejectMessage implements Message{
 
-    public Edge j;
+    public int sender_id;
 
-    public RejectMessage(Edge j){
-        this.j = j;
+    public RejectMessage(int sender_id){
+        this.sender_id = sender_id;
     }
 
     @Override
     public void execute(GHS instance) throws RemoteException, NotBoundException, MalformedURLException {
-        if(this.j.getStatus().equals("?_in_MST")) this.j.setStatus("not_in_MST");
+        System.out.println("Executing reject on " + instance.toString());
+        Edge j = instance.getReceiveEdge(this.sender_id);
+        if(j.getStatus().equals("?_in_MST")){
+            j.setStatus("not_in_MST");
+        }
         instance.test();
     }
 }

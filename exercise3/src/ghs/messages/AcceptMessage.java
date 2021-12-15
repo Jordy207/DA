@@ -9,18 +9,20 @@ import java.rmi.RemoteException;
 
 public class AcceptMessage implements Message {
 
-    public Edge j;
+    public int sender_id;
 
-    public AcceptMessage(Edge j){
-        this.j = j;
+    public AcceptMessage(int sender_id){
+        this.sender_id = sender_id;
     }
 
     @Override
     public void execute(GHS instance) throws RemoteException, NotBoundException, MalformedURLException {
+        System.out.println("Executing accept on " + instance.toString());
+        Edge j = instance.getReceiveEdge(this.sender_id);
         instance.test_edge = null;
-        if(this.j.getWeight() < instance.best_wt){
-            instance.best_edge = this.j;
-            instance.best_wt = this.j.getWeight();
+        if(j.getWeight() < instance.best_wt){
+            instance.best_edge = j;
+            instance.best_wt = j.getWeight();
         }
         instance.report();
     }

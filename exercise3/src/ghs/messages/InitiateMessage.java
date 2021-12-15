@@ -11,30 +11,36 @@ public class InitiateMessage implements Message{
     int L;
     int F;
     String S;
-    Edge j;
+    int sender_id;
 
-    public InitiateMessage(int L, int F, String S, Edge j){
+    public InitiateMessage(int L, int F, String S, int sender_id){
         this.L = L;
         this.F = F;
         this.S = S;
-        this.j = j;
+        this.sender_id = sender_id;
     }
 
     @Override
     public void execute(GHS instance) throws RemoteException, NotBoundException, MalformedURLException {
+        System.out.println("Executing initiate on " + instance.toString());
+        Edge j= instance.getReceiveEdge(this.sender_id);
         instance.LN = this.L;
         instance.FN = this.F;
         instance.SN = this.S;
-        instance.in_branch = this.j;
+        instance.in_branch = j;
         instance.best_edge = null;
         instance.best_wt = Integer.MAX_VALUE;
         for(Edge edge : instance.edges){
             if(!edge.equals(j) && edge.getStatus().equals("in_MST")){
-                InitiateMessage sendMessage = new InitiateMessage(this.L, this.F, this.S, edge);
+                InitiateMessage sendMessage = new InitiateMessage(this.L, this.F, this.S, instance.id);
                 instance.send(sendMessage, edge);
-                if(S.equals("find")) instance.find_count++;
+                if(this.S.equals("find")) {
+                    instance.find_count++;
+                }
             }
         }
-        if(S.equals("find")) instance.test();
+        if(S.equals("find")){
+            instance.test();
+        }
     }
 }

@@ -1,8 +1,9 @@
 package ghs;
 
+import java.io.Serializable;
 import java.util.Objects;
 
-public class Edge {
+public class Edge implements Serializable {
 
     String SE;
     int weight;
@@ -35,11 +36,11 @@ public class Edge {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Edge edge = (Edge) o;
-        return weight == edge.weight &&
-                connectedNode == edge.connectedNode;
+        return this.weight == edge.weight &&
+                this.connectedNode == edge.connectedNode;
     }
 
     public String toString() {
-        return this.connectedNode + " " + this.weight;
+        return this.connectedNode + " " + this.weight + " " + this.SE;
     }
 }

@@ -9,14 +9,11 @@ import java.rmi.RemoteException;
 
 public class ChangeMessage implements Message{
 
-    Edge j;
-
-    public ChangeMessage(Edge j){
-        this.j = j;
-    }
+    public ChangeMessage(){}
 
     @Override
     public void execute(GHS instance) throws RemoteException, NotBoundException, MalformedURLException {
+        System.out.println("Executing change on " + instance.toString());
         instance.changeRoot();
     }
 }

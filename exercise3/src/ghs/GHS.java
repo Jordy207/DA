@@ -6,12 +6,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class GHS extends UnicastRemoteObject implements GHS_RMI{
 
@@ -20,7 +16,7 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
     public String SN;
     public int id;
     public List<Edge> edges;
-    public List<Message> message_queue;
+    public Queue<Message> message_queue;
     public int find_count;
     public Edge in_branch;
     public Edge best_edge;
@@ -34,11 +30,12 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         this.id = id;
         this.edges = edges;
         this.ip_dest = ip_dest;
-        this.message_queue = new ArrayList<>();
+        this.message_queue = new LinkedList<>();
         this.LN = 0;
         this.SN = "sleeping";
         this.find_count = 0;
         this.best_wt = Integer.MAX_VALUE;
+        this.test_edge = null;
     }
 
     public Edge getMOE(List<Edge> edges){
@@ -54,16 +51,17 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
     }
 
     public void wakeUp() throws RemoteException, NotBoundException, MalformedURLException {
-        System.out.println("ghs-" + this.id + " ready");
+        System.out.println("ghs-" + this.id + " woke up");
         Edge j = getMOE(this.edges);
         j.setStatus("in_MST");
         this.LN = 0;
         this.SN = "found";
-        ConnectMessage message = new ConnectMessage(0, j);
+        ConnectMessage message = new ConnectMessage(0, this.id);
         send(message, j);
     }
 
     public void test() throws RemoteException, NotBoundException, MalformedURLException {
+        System.out.println("ghs-" + this.id + " running test");
         boolean edgeFound = false;
         for(Edge edge : this.edges){
             if(edge.getStatus().equals("?_in_MST")){
@@ -72,60 +70,107 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
             }
         }
         if(edgeFound){
-            test_edge = this.getMOE(this.edges);
-            TestMessage sendMessage = new TestMessage(this.LN, this.FN, test_edge);
-            this.send(sendMessage, test_edge);
+            this.test_edge = this.getMOE(this.edges);
+            TestMessage sendMessage = new TestMessage(this.LN, this.FN, this.id);
+            this.send(sendMessage, this.test_edge);
+        } else {
+            this.test_edge = null;
+            this.report();
         }
     }
 
     public void report() throws RemoteException, NotBoundException, MalformedURLException {
+        System.out.println("ghs-" + this.id + " running report");
         if(this.find_count == 0 && test_edge == null){
             this.SN = "found";
-            ReportMessage sendMessage = new ReportMessage(this.best_wt, this.in_branch);
+            ReportMessage sendMessage = new ReportMessage(this.best_wt, this.id);
             this.send(sendMessage, this.in_branch);
         }
     }
 
     public void changeRoot() throws RemoteException, NotBoundException, MalformedURLException {
+        System.out.println("ghs-" + this.id + " running change");
         if(this.best_edge.getStatus().equals("in_MST")){
-            ChangeMessage sendMessage = new ChangeMessage(this.best_edge);
+            ChangeMessage sendMessage = new ChangeMessage();
             this.send(sendMessage, this.best_edge);
         } else {
-            ConnectMessage sendMessage = new ConnectMessage(this.LN, this.best_edge);
+            ConnectMessage sendMessage = new ConnectMessage(this.LN, this.id);
             this.send(sendMessage, this.best_edge);
             this.best_edge.setStatus("in_MST");
         }
     }
 
-    public synchronized void receive(Message message) throws RemoteException, NotBoundException, MalformedURLException {
+    public synchronized void receive(Message message) throws RemoteException, NotBoundException, MalformedURLException, InterruptedException {
+        System.out.println("Receiving " + message.getClass().getSimpleName() + " on " + this.toString());
         message.execute(this);
-        checkQueue();
+        if(!this.message_queue.isEmpty()) {
+            checkQueue();
+        }
+        System.out.println("executed");
+
     }
 
     public void send(Message message, Edge j){
-        String dest = "//" + ip_dest.get(j.getConnectedNode()) + "/ghs-" + j.getConnectedNode();
+        int dest_id = j.getConnectedNode();
+        System.out.printf("Sending %s from %s to %d\n",
+                message.getClass().getSimpleName(), this.toString(), dest_id);
+        String dest = "//" + ip_dest.get(dest_id) + "/ghs-" + dest_id;
+        int wait = (int)(Math.random()*5000);
         try {
             GHS_RMI GHS_dest = (GHS_RMI) Naming.lookup(dest);
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        Thread.sleep((int)(Math.random()*5000));
-                        GHS_dest.receive(message);
-                    } catch(Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        } catch(Exception e){
+            new java.util.Timer().schedule(
+                    new java.util.TimerTask() {
+                        @Override
+                        public void run(){
+                            try{
+                                GHS_dest.receive(message);
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }, wait
+            );
+        } catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public void checkQueue() throws RemoteException, NotBoundException, MalformedURLException {
-        for(Message m : message_queue){
-            m.execute(this);
+    public synchronized void checkQueue() throws RemoteException, NotBoundException, MalformedURLException {
+        System.err.println("checking queue  for " + this.toString());
+        int message_queue_size = this.message_queue.size();
+        for (int i = 0; i < message_queue_size; i++) {
+            if(this.message_queue.size() != 0){
+                Message m = this.message_queue.remove();
+                m.execute(this);
+            }
         }
+        System.err.println("queue checked " + this.toString());
+    }
+
+    public Edge getReceiveEdge(int id){
+        for(Edge e : edges){
+            if(e.getConnectedNode() == id){
+                return e;
+            }
+        }
+        return null;
+    }
+
+    public String toString(){
+        String in_branch_s = "null";
+        String test_edge_s = "null";
+        String best_edge_s = "null";
+        if(in_branch != null){
+            in_branch_s = this.in_branch.toString();
+        }
+        if(test_edge != null){
+            test_edge_s = this.test_edge.toString();
+        }
+        if(best_edge != null){
+            best_edge_s = this.best_edge.toString();
+        }
+        return String.format(
+                "(id: %d, level: %d, name: %d, status: %s, in-branch: %s, best-edge: %s, best-wt: %d, test-edge: %s, findcount: %d)",
+                this.id, this.LN, this.FN, this.SN, in_branch_s, best_edge_s, this.best_wt, test_edge_s, this.find_count);
     }
 }
