@@ -2,8 +2,10 @@ package ghs.messages;
 
 import ghs.Edge;
 import ghs.GHS;
+import ghs.GHS_RMI;
 
 import java.net.MalformedURLException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
@@ -38,6 +40,11 @@ public class ReportMessage implements Message{
                 } else if(this.w == instance.best_wt && instance.best_wt == Integer.MAX_VALUE) {
                     // HALT
                     System.out.println("HALT");
+                    for(int dest : instance.ip_dest.keySet()){
+                        String destination = "//" + instance.ip_dest.get(dest) + "/ghs-" + dest;
+                        GHS_RMI GHS_dest = (GHS_RMI) Naming.lookup(destination);
+                        GHS_dest.print_info();
+                    }
                 }
             }
         }

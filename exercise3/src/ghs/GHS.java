@@ -115,7 +115,8 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         System.out.printf("Sending %s from %s to %d\n",
                 message.getClass().getSimpleName(), this.toString(), dest_id);
         String dest = "//" + ip_dest.get(dest_id) + "/ghs-" + dest_id;
-        int wait = (int)(Math.random()*5000);
+//        int wait = (int)(Math.random()*200);
+        int wait = 200 + (int)(Math.random()*100);
         try {
             GHS_RMI GHS_dest = (GHS_RMI) Naming.lookup(dest);
             new java.util.Timer().schedule(
@@ -130,6 +131,11 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
                         }
                     }, wait
             );
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        try{
+            Thread.sleep(2000);
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -172,5 +178,14 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         return String.format(
                 "(id: %d, level: %d, name: %d, status: %s, in-branch: %s, best-edge: %s, best-wt: %d, test-edge: %s, findcount: %d)",
                 this.id, this.LN, this.FN, this.SN, in_branch_s, best_edge_s, this.best_wt, test_edge_s, this.find_count);
+    }
+
+
+    public void print_info(){
+        for(Edge e : this.edges){
+            if(e.getStatus().equals("in_MST")) {
+                System.out.printf("Edge from ghs-%d %s\n", this.id, e.toString());
+            }
+        }
     }
 }

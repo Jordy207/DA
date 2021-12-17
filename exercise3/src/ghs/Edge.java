@@ -41,6 +41,6 @@ public class Edge implements Serializable {
     }
 
     public String toString() {
-        return this.connectedNode + " " + this.weight + " " + this.SE;
+        return "(" + this.connectedNode + " " + this.weight + " " + this.SE + ")";
     }
 }

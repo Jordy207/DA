@@ -9,4 +9,5 @@ import java.rmi.RemoteException;
 
 public interface GHS_RMI extends Remote {
     void receive(Message message) throws RemoteException, NotBoundException, MalformedURLException, InterruptedException;
+    void print_info() throws RemoteException;
 }

@@ -16,10 +16,9 @@ import java.util.Map;
 public class GHS_main {
     public static void main(String[] args) throws RemoteException {
 
-        String network_filename = "graphs/graph_2_nodes.txt";
+        String network_filename = "graphs/graph_5_nodes.txt";
         HashMap<Integer, List<Edge>> network = new HashMap<>();
         int num_nodes = 0;
-        int num_edges = 0;
         try {
             FileReader networkFile = new FileReader(network_filename);
             BufferedReader networkReader = new BufferedReader(networkFile);
@@ -28,7 +27,6 @@ public class GHS_main {
             String[] data = line.split(" ");
 
             num_nodes = Integer.parseInt(data[0]);
-            num_edges = Integer.parseInt(data[1]);
 
             for (int i = 0; i < num_nodes; i++) {
                 network.put(i, new ArrayList<>());
@@ -40,19 +38,31 @@ public class GHS_main {
                 src = Integer.parseInt(data[0]);
                 dst = Integer.parseInt(data[1]);
                 w = Integer.parseInt(data[2]);
-                Edge e = new Edge(dst, w);
-                network.get(src).add(e);
+                Edge e1 = new Edge(dst, w);
+                Edge e2 = new Edge(src, w);
+                network.get(src).add(e1);
+                network.get(dst).add(e2);
             }
         }
         catch (IOException e) {
             e.printStackTrace();
         }
         GHS wakeup = null;
-        String ip_jordy = "localhost";
-        HashMap<Integer, String> ip_map = new HashMap<>(Map.of(0, ip_jordy,
-                1, ip_jordy, 2, ip_jordy, 3, ip_jordy, 4, ip_jordy));
+        String ip_jordy = "145.94.167.94";
+        String ip_mariette = "";
+        HashMap<Integer, String> ip_map = new HashMap<>();
+        List<Integer> myNodes = new ArrayList<>();
+//        for(int i = 0; i < num_nodes; i++){
+//            ip_map.put(i, ip_jordy);
+//            myNodes.add(i);
+//        }
         Registry registry = LocateRegistry.getRegistry();
-        List<Integer> myNodes = new ArrayList<>(List.of(0,1,2,3,4));
+        ip_map.put(0, ip_jordy);
+        ip_map.put(1, ip_jordy);
+        ip_map.put(2, ip_mariette);
+        ip_map.put(3, ip_mariette);
+        myNodes.add(0);
+        myNodes.add(1);
         for(int node : myNodes){
             GHS client = new GHS(node, network.get(node), ip_map);
             registry.rebind("ghs-" + node, client);

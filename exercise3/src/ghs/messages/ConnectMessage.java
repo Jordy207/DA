@@ -33,7 +33,7 @@ public class ConnectMessage implements Message{
             }
         } else {
             if(j.getStatus().equals("?_in_MST")){
-                System.out.println("Message ");
+                System.out.println("Message added to queue");
                 instance.message_queue.add(this);
             } else {
                 InitiateMessage sendMessage = new InitiateMessage(instance.LN + 1, j.getWeight(),
