@@ -2,6 +2,7 @@ package ghs;
 
 import java.io.BufferedReader;
 import java.net.MalformedURLException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RMISecurityManager;
 import java.rmi.registry.LocateRegistry;
@@ -15,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 public class GHS_main {
-    public static void main(String[] args) throws RemoteException {
+    public static void main(String[] args) throws RemoteException, MalformedURLException {
 
-        String network_filename = "graphs/fully_4_nodes.txt";
+        String network_filename = "exercise3/graphs/fully_4_nodes.txt";
         HashMap<Integer, List<Edge>> network = new HashMap<>();
         int num_nodes = 0;
         try {
@@ -57,7 +58,7 @@ public class GHS_main {
 //            ip_map.put(i, ip_jordy);
 //            myNodes.add(i);
 //        }
-        System.setProperty("java.security.policy","mypolicy.policy");
+        System.setProperty("java.security.policy","exercise3/mypolicy.policy");
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
@@ -66,11 +67,12 @@ public class GHS_main {
         ip_map.put(1, ip_jordy);
         ip_map.put(2, ip_mariette);
         ip_map.put(3, ip_mariette);
-        myNodes.add(0);
-        myNodes.add(1);
+        myNodes.add(2);
+        myNodes.add(3);
         for(int node : myNodes){
             GHS client = new GHS(node, network.get(node), ip_map);
-            registry.rebind("ghs-" + node, client);
+            String dest = "//" + ip_map.get(node) + "/ghs-" + node;
+            Naming.rebind(dest, client);
             System.out.println("ghs-" + node + " ready");
             if(node == 0){
                 wakeup = client;

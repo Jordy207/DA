@@ -23,6 +23,13 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
     public int best_wt;
     public Edge test_edge;
     public HashMap<Integer, String> ip_dest;
+    public int acceptCount;
+    public int changeCount;
+    public int connectCount;
+    public int initiateCount;
+    public int rejectCount;
+    public int reportCount;
+    public int testCount;
 
 
     public GHS(int id, List<Edge> edges, HashMap<Integer, String> ip_dest) throws RemoteException {
@@ -36,6 +43,13 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
         this.find_count = 0;
         this.best_wt = Integer.MAX_VALUE;
         this.test_edge = null;
+        this.acceptCount = 0;
+        this.changeCount = 0;
+        this.connectCount = 0;
+        this.initiateCount = 0;
+        this.rejectCount = 0;
+        this.reportCount = 0;
+        this.testCount = 0;
     }
 
     public Edge getMOE(List<Edge> edges){
@@ -101,7 +115,17 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
     }
 
     public synchronized void receive(Message message) throws RemoteException, NotBoundException, MalformedURLException, InterruptedException {
-        System.out.println("Receiving " + message.getClass().getSimpleName() + " on " + this.toString());
+        String messageType = message.getClass().getSimpleName();
+        System.out.println("Receiving " + messageType + " on " + this.toString());
+        switch (messageType) {
+            case "AcceptMessage" -> this.acceptCount++;
+            case "ChangeMessage" -> this.changeCount++;
+            case "ConnectMessage" -> this.connectCount++;
+            case "InitiateMessage" -> this.initiateCount++;
+            case "RejectMessage" -> this.rejectCount++;
+            case "ReportMessage" -> this.reportCount++;
+            case "TestMessage" -> this.testCount++;
+        }
         message.execute(this);
         if(!this.message_queue.isEmpty()) {
             checkQueue();
@@ -182,10 +206,18 @@ public class GHS extends UnicastRemoteObject implements GHS_RMI{
 
 
     public void print_info(){
+        System.out.println("Information for node " + this.id);
         for(Edge e : this.edges){
             if(e.getStatus().equals("in_MST")) {
                 System.out.printf("Edge from ghs-%d %s\n", this.id, e.toString());
             }
         }
+        System.out.println("Amount of accept messages: " + this.acceptCount);
+        System.out.println("Amount of change messages: " + this.changeCount);
+        System.out.println("Amount of connect messages: " + this.connectCount);
+        System.out.println("Amount of initiate messages: " + this.initiateCount);
+        System.out.println("Amount of reject messages: " + this.rejectCount);
+        System.out.println("Amount of report messages: " + this.reportCount);
+        System.out.println("Amount of test messages: " + this.testCount);
     }
 }
