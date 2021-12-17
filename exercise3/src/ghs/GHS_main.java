@@ -3,6 +3,7 @@ package ghs;
 import java.io.BufferedReader;
 import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
+import java.rmi.RMISecurityManager;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class GHS_main {
     public static void main(String[] args) throws RemoteException {
 
-        String network_filename = "graphs/graph_5_nodes.txt";
+        String network_filename = "graphs/fully_4_nodes.txt";
         HashMap<Integer, List<Edge>> network = new HashMap<>();
         int num_nodes = 0;
         try {
@@ -49,13 +50,17 @@ public class GHS_main {
         }
         GHS wakeup = null;
         String ip_jordy = "145.94.167.94";
-        String ip_mariette = "";
+        String ip_mariette = "145.94.228.51";
         HashMap<Integer, String> ip_map = new HashMap<>();
         List<Integer> myNodes = new ArrayList<>();
 //        for(int i = 0; i < num_nodes; i++){
 //            ip_map.put(i, ip_jordy);
 //            myNodes.add(i);
 //        }
+        System.setProperty("java.security.policy","mypolicy.policy");
+        if (System.getSecurityManager() == null) {
+            System.setSecurityManager(new SecurityManager());
+        }
         Registry registry = LocateRegistry.getRegistry();
         ip_map.put(0, ip_jordy);
         ip_map.put(1, ip_jordy);
